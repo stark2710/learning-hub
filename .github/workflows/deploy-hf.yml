@@ -1,0 +1,25 @@
+name: Deploy to Hugging Face Space
+
+# Mirrors this repo to the HF Space on every push to main; HF then rebuilds the
+# Docker image. Requires a repo secret named HF_TOKEN (a HF *write* token).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git push --force \
+            "https://Bharat2710:${HF_TOKEN}@huggingface.co/spaces/Bharat2710/MasterG.git" \
+            HEAD:main

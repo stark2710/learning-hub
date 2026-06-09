@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Hub</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --card2: #1e2130;
+    --text: #e2e8f0; --muted: #94a3b8; --border: #2d3148;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  .header {
+    width: 100%; text-align: center;
+    padding: 72px 32px 48px;
+    background: linear-gradient(160deg, #0f1117 0%, #1a1030 60%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .header h1 {
+    font-size: 48px; font-weight: 900; letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 30%, #a855f7 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .header p { color: var(--muted); font-size: 16px; }
+
+  .programs {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    justify-content: center;
+    padding: 64px 24px 80px;
+    max-width: 1200px; width: 100%;
+  }
+
+  /* ── Regular tile ── */
+  .tile {
+    display: flex; flex-direction: column;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 36px 32px;
+    text-decoration: none; color: var(--text);
+    width: 360px; min-height: 220px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .tile::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--tile-color);
+  }
+  .tile:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    border-color: var(--tile-color);
+  }
+  .tile.coming-soon { opacity: 0.55; pointer-events: none; cursor: default; }
+
+  .tile-icon { font-size: 36px; margin-bottom: 16px; filter: drop-shadow(0 0 12px var(--tile-color)); }
+  .tile-name  { font-size: 22px; font-weight: 800; margin-bottom: 8px; color: var(--tile-color); }
+  .tile-desc  { font-size: 13px; color: var(--muted); line-height: 1.6; flex: 1; }
+  .tile-meta  {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 24px; padding-top: 16px;
+    border-top: 1px solid var(--border); font-size: 12px;
+  }
+  .tile-stats { color: var(--muted); }
+  .tile-arrow { font-size: 18px; color: var(--tile-color); transition: transform 0.2s; }
+  .tile:hover .tile-arrow { transform: translateX(4px); }
+  .tile-badge {
+    display: inline-block; padding: 2px 10px;
+    border-radius: 99px; font-size: 10px; font-weight: 700;
+    background: var(--card2); color: var(--muted); border: 1px solid var(--border);
+  }
+
+  .progress-bar  { height: 4px; background: var(--card2); border-radius: 99px; margin-top: 14px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: var(--tile-color); transition: width 0.6s ease; }
+
+  /* ── Add-new tile ── */
+  .tile-add {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: transparent;
+    border: 2px dashed var(--border);
+    border-radius: 20px; padding: 36px 32px;
+    width: 360px; min-height: 220px;
+    cursor: pointer; text-decoration: none; color: var(--muted);
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    gap: 12px;
+  }
+  .tile-add:hover {
+    border-color: #a855f7; color: #a855f7;
+    background: rgba(168,85,247,0.04);
+  }
+  .add-icon {
+    font-size: 40px; font-weight: 200; line-height: 1;
+    transition: transform 0.2s;
+  }
+  .tile-add:hover .add-icon { transform: scale(1.15); }
+  .add-label { font-size: 15px; font-weight: 700; }
+  .add-hint  { font-size: 12px; text-align: center; line-height: 1.5; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.72);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; padding: 20px;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 36px; width: 460px; max-width: 100%;
+  }
+  .modal-box h2 { font-size: 20px; font-weight: 800; margin-bottom: 24px; }
+
+  .field-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  }
+  .name-input {
+    width: 100%;
+    background: var(--card2); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-size: 15px; font-family: inherit;
+    padding: 12px 16px; transition: border-color 0.2s;
+    margin-bottom: 24px;
+  }
+  .name-input:focus { outline: none; border-color: #a855f7; }
+  .name-input::placeholder { color: var(--muted); }
+
+  .icon-grid {
+    display: grid; grid-template-columns: repeat(8, 1fr);
+    gap: 8px; margin-bottom: 24px;
+  }
+  .icon-btn {
+    aspect-ratio: 1; border-radius: 10px;
+    border: 2px solid var(--border); background: var(--card2);
+    font-size: 20px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .icon-btn:hover { border-color: #a855f7; background: rgba(168,85,247,0.08); }
+  .icon-btn.selected { border-color: #a855f7; background: rgba(168,85,247,0.15); }
+
+  .color-row {
+    display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap;
+  }
+  .color-swatch {
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; border: 3px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.selected { border-color: #fff; transform: scale(1.15); }
+
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+  .btn-cancel {
+    padding: 10px 20px; border-radius: 10px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; font-size: 14px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+  .btn-create {
+    padding: 10px 24px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-create:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .modal-feedback {
+    margin-top: 12px; font-size: 13px; text-align: center; min-height: 18px;
+  }
+  .modal-feedback.error { color: #ef4444; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Learning Hub</h1>
+  <p>Pick a mastery program to continue your session</p>
+</div>
+
+<div class="programs" id="programs">
+  <!-- All tiles rendered by JS from programs.md via /programs -->
+
+  <!-- Add New Program tile (always last) -->
+  <div class="tile-add" id="add-tile" onclick="openModal()">
+    <div class="add-icon">+</div>
+    <div class="add-label">New Program</div>
+    <div class="add-hint">Name it, pick an icon, start learning</div>
+  </div>
+
+</div>
+
+<!-- Create Program Modal -->
+<div class="modal-overlay hidden" id="create-modal">
+  <div class="modal-box">
+    <h2>New Program</h2>
+
+    <div class="field-label">Program name</div>
+    <input class="name-input" type="text" id="prog-name" placeholder="e.g. Golang Mastery" maxlength="50" />
+
+    <div class="field-label">Icon</div>
+    <div class="icon-grid" id="icon-grid"></div>
+
+    <div class="field-label">Color</div>
+    <div class="color-row" id="color-row"></div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-create" onclick="createProgram()">Create</button>
+    </div>
+    <div class="modal-feedback" id="create-feedback"></div>
+  </div>
+</div>
+
+<script>
+const ICONS = ['🎯','⚡','🚀','🌊','🔥','🎓','🛠️','💡','🌐','📦','🔮','⭐','🎨','🏗️','🧠','🐍','☕','🦀','📡','🗄️','🔐','🌿','📊','🎮'];
+const COLORS = ['#7c3aed','#3b82f6','#10b981','#f97316','#ef4444','#f59e0b','#14b8a6','#ec4899','#6366f1','#22d3ee'];
+
+let selIcon = ICONS[0], selColor = COLORS[0];
+
+// ── Build icon grid & color row ───────────────────────────────────────────────
+(function () {
+  const iconGrid = document.getElementById('icon-grid');
+  ICONS.forEach((ic, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'icon-btn' + (i === 0 ? ' selected' : '');
+    btn.textContent = ic;
+    btn.onclick = () => {
+      selIcon = ic;
+      iconGrid.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    iconGrid.appendChild(btn);
+  });
+
+  const colorRow = document.getElementById('color-row');
+  COLORS.forEach((c, i) => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch' + (i === 0 ? ' selected' : '');
+    sw.style.background = c;
+    sw.title = c;
+    sw.onclick = () => {
+      selColor = c;
+      colorRow.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+    };
+    colorRow.appendChild(sw);
+  });
+})();
+
+// ── Backend Mastery progress (localStorage + server) ─────────────────────────
+function backendProgress() {
+  const TOTAL = 211;
+  const legacy = JSON.parse(localStorage.getItem('lessonProgress') || '{}');
+  let done = Object.values(legacy).filter(v => v.completed).length;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (/^m\d+-l\d+/.test(key) && key !== 'lessonProgress') {
+      try { const v = JSON.parse(localStorage.getItem(key)); if (v?.complete) done++; } catch (e) {}
+    }
+  }
+  return { done, total: TOTAL };
+}
+
+// ── Load all programs from server (source of truth: programs.md) ──────────────
+async function loadPrograms() {
+  try {
+    const programs = await (await fetch('/programs')).json();
+    const addTile = document.getElementById('add-tile');
+    document.querySelectorAll('.tile-program').forEach(el => el.remove());
+
+    programs.forEach(p => {
+      const comingSoon = p.status === 'coming-soon';
+      const tile = document.createElement('a');
+      tile.className = 'tile tile-program' + (comingSoon ? ' coming-soon' : '');
+      tile.href = p.url;
+      tile.style.setProperty('--tile-color', p.color);
+
+      let progressHtml = '';
+      let metaHtml = '';
+
+      if (comingSoon) {
+        progressHtml = `<div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>`;
+        metaHtml = `<span class="tile-badge">Coming soon</span><span class="tile-arrow">&#8594;</span>`;
+      } else if (p.id === 'backend-mastery') {
+        const { done, total } = backendProgress();
+        const pct = Math.round(done / total * 100);
+        const statsText = done > 0 ? `${done}/${total} lessons complete` : `${total} lessons`;
+        progressHtml = `<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+        metaHtml = `<span class="tile-stats">${statsText}</span><span class="tile-arrow">&#8594;</span>`;
+      } else {
+        progressHtml = `<div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>`;
+        metaHtml = `<span class="tile-stats">${p.total_lessons || 0} lessons</span><span class="tile-arrow">&#8594;</span>`;
+      }
+
+      tile.innerHTML = `
+        <div class="tile-icon">${p.icon}</div>
+        <div class="tile-name">${p.name}</div>
+        <div class="tile-desc">${p.description}</div>
+        ${progressHtml}
+        <div class="tile-meta">${metaHtml}</div>`;
+
+      addTile.parentNode.insertBefore(tile, addTile);
+    });
+  } catch (e) {}
+}
+
+loadPrograms();
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('create-modal').classList.remove('hidden');
+  document.getElementById('prog-name').focus();
+}
+function closeModal() {
+  document.getElementById('create-modal').classList.add('hidden');
+  document.getElementById('create-feedback').textContent = '';
+  document.getElementById('prog-name').value = '';
+}
+document.getElementById('create-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('create-modal')) closeModal();
+});
+document.getElementById('prog-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') createProgram();
+});
+
+// ── Create ────────────────────────────────────────────────────────────────────
+async function createProgram() {
+  const name = document.getElementById('prog-name').value.trim();
+  const fb = document.getElementById('create-feedback');
+  if (!name) { fb.textContent = 'Please enter a program name.'; fb.className = 'modal-feedback error'; return; }
+
+  try {
+    const res = await fetch('/create_program', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, icon: selIcon, color: selColor }),
+    });
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    closeModal();
+    await loadPrograms();
+  } catch (e) {
+    fb.textContent = 'Error: ' + e.message;
+    fb.className = 'modal-feedback error';
+  }
+}
+</script>
+
+<script src="/ai-settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Program</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --card2: #1e2130;
+    --text: #e2e8f0; --muted: #94a3b8; --border: #2d3148;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  .header {
+    padding: 48px 32px 32px; text-align: center;
+    background: linear-gradient(160deg, #0f1117 0%, #1a1030 60%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-icon { font-size: 48px; margin-bottom: 12px; }
+  .header h1 {
+    font-size: 36px; font-weight: 900; letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 30%, var(--prog-color, #a855f7) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .header-desc { color: var(--muted); font-size: 14px; max-width: 600px; margin: 0 auto 20px; }
+  .header-stats { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 20px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 800; color: var(--prog-color, #a855f7); }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 20px 24px 0; }
+  .tab {
+    padding: 6px 16px; border-radius: 99px; font-size: 12px; font-weight: 700;
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .tab:hover { border-color: var(--prog-color, #a855f7); color: var(--prog-color, #a855f7); }
+  .tab.active { background: var(--prog-color, #a855f7); border-color: var(--prog-color, #a855f7); color: #fff; }
+  .tab-add {
+    padding: 6px 16px; border-radius: 99px; font-size: 12px; font-weight: 700;
+    border: 1px dashed var(--border); background: transparent; color: var(--muted);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .tab-add:hover { border-color: var(--prog-color, #a855f7); color: var(--prog-color, #a855f7); }
+
+  #main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  .domain-section { margin-bottom: 48px; }
+  .domain-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .domain-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .domain-title { font-size: 18px; font-weight: 800; }
+  .domain-count { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .add-mod-btn {
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px;
+    border: 1px dashed var(--border); cursor: pointer; background: transparent;
+    color: var(--muted); transition: all 0.2s; white-space: nowrap;
+  }
+  .add-mod-btn:hover { border-color: var(--btn-color, #a855f7); color: var(--btn-color, #a855f7); }
+  .gen-first-btn {
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px;
+    border: 1px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--btn-color, #a855f7) 15%, transparent),
+      color-mix(in srgb, var(--btn-color, #a855f7) 8%, transparent));
+    color: var(--btn-color, #a855f7); border-color: color-mix(in srgb, var(--btn-color, #a855f7) 40%, transparent);
+  }
+  .gen-first-btn:hover { opacity: 0.8; transform: translateY(-1px); }
+  .domain-progress-bar { height: 3px; background: var(--card2); border-radius: 99px; margin-bottom: 20px; overflow: hidden; }
+  .domain-progress-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+
+  .module-row { margin-bottom: 24px; }
+  .module-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 10px; padding-left: 2px;
+  }
+  .add-lesson-btn {
+    font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 99px;
+    border: 1px dashed var(--border); cursor: pointer; background: transparent;
+    color: var(--muted); transition: all 0.2s; white-space: nowrap;
+    text-transform: none; letter-spacing: 0;
+  }
+  .add-lesson-btn:hover { border-color: var(--btn-color, #a855f7); color: var(--btn-color, #a855f7); }
+
+  .lessons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .lesson-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; text-decoration: none; color: var(--text);
+    transition: all 0.2s; cursor: pointer; display: block;
+  }
+  .lesson-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .lesson-card.locked { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
+  .card-num { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .card-topic { font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 12px; }
+  .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .badge.done { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge.available { background: rgba(168,85,247,0.12); }
+  .badge.locked { background: var(--card2); color: var(--muted); }
+
+  .empty-state { text-align: center; padding: 80px 24px; color: var(--muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: flex; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
+  .modal-overlay.hidden { display: none; }
+  .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px; width: 480px; max-width: 100%; }
+  .modal-box h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+  .modal-box textarea, .modal-box input[type="password"] {
+    width: 100%; background: var(--card2); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text); font-size: 14px; font-family: inherit;
+    padding: 12px 16px; resize: vertical; transition: border-color 0.2s; margin-bottom: 12px;
+  }
+  .modal-box textarea:focus, .modal-box input[type="password"]:focus { outline: none; border-color: var(--prog-color, #a855f7); }
+  .modal-box textarea::placeholder, .modal-box input[type="password"]::placeholder { color: var(--muted); }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+  .btn-cancel { padding: 10px 20px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; transition: all 0.2s; }
+  .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+  .btn-go { padding: 10px 24px; border-radius: 10px; border: none; background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-go:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-go:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+  .modal-feedback { margin-top: 10px; font-size: 13px; min-height: 18px; }
+  .modal-feedback.error { color: #ef4444; }
+  .modal-feedback.success { color: #10b981; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes slideIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+  .modal-spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--prog-color, #a855f7); border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
+  .gen-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.15); border-top-color: var(--prog-color, #a855f7); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; flex-shrink: 0; }
+  #genNotif { display:none; position:fixed; top:20px; right:20px; z-index:3000; width:300px; background:#1a1d27; border:1px solid #2d3148; border-radius:14px; padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6); }
+  #genNotif.show { display:block; animation: slideIn 0.25s ease; }
+  #genNotif.success { border-color: #10b981; }
+  #genNotif.error { border-color: #ef4444; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon" id="prog-icon">⏳</div>
+  <h1 id="prog-name">Loading…</h1>
+  <div class="header-desc" id="prog-desc"></div>
+  <div class="header-stats">
+    <div class="stat"><div class="stat-num" id="stat-total">0/0</div><div class="stat-label">Lessons</div></div>
+    <div class="stat"><div class="stat-num" id="stat-pct">0%</div><div class="stat-label">Complete</div></div>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" onclick="filterDomain('all')">All</div>
+  <div class="tab-add" onclick="openModal('domain')">+ Add Domain</div>
+</div>
+
+<div id="main"></div>
+
+<div class="modal-overlay hidden" id="add-modal">
+  <div class="modal-box">
+    <h2 id="modal-title">Add Domain</h2>
+    <p class="modal-sub" id="modal-sub"></p>
+    <!-- AI provider toggle -->
+    <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
+      <div style="display:flex;background:#0d1117;border:1px solid #2d3148;border-radius:8px;padding:3px;gap:3px;">
+        <button id="mproviderClaude" onclick="setModalProvider('claude')" style="background:#7c3aed;color:white;border:none;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">✦ Claude</button>
+        <button id="mproviderOllama" onclick="setModalProvider('ollama')" style="background:none;color:#64748b;border:none;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">◈ Ollama</button>
+        <button id="mproviderLocalClaude" onclick="setModalProvider('local-claude')" style="background:none;color:#64748b;border:none;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">◉ Local</button>
+      </div>
+      <select id="modal-ollama-model" style="display:none;flex:1;background:#0d1117;border:1px solid #2d3148;border-radius:8px;color:#e2e8f0;padding:5px 10px;font-size:12px;outline:none;">
+        <option value="">Loading models…</option>
+      </select>
+    </div>
+    <textarea id="modal-prompt" rows="3" placeholder=""></textarea>
+    <input type="password" id="modal-api-key" placeholder="Anthropic API key (sk-ant-…)" />
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-go" id="modal-go" onclick="submitModal()">Generate</button>
+    </div>
+    <div class="modal-feedback" id="modal-feedback"></div>
+  </div>
+</div>
+
+<div id="genNotif">
+  <div style="display:flex;align-items:flex-start;gap:10px;">
+    <div id="genNotifIcon" style="flex-shrink:0;margin-top:2px;font-size:16px;display:flex;align-items:center;">⚙</div>
+    <div style="flex:1;min-width:0;">
+      <div id="genNotifTitle" style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:3px;">Generating…</div>
+      <div id="genNotifMsg" style="font-size:12px;color:#94a3b8;line-height:1.5;"></div>
+    </div>
+    <button onclick="closeGenNotif()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:20px;line-height:1;padding:0;flex-shrink:0;">&times;</button>
+  </div>
+</div>
+
+<script>
+const PROGRAM_ID = new URLSearchParams(location.search).get('id') || '';
+let program = null;
+let serverProgress = {};
+let currentFilter = 'all';
+let modalMode = 'domain';
+let modalDomainId = null;
+let modalModNum = null;
+let _modalProvider = localStorage.getItem('ai_provider') || 'claude';
+
+function setModalProvider(p) {
+  _modalProvider = p;
+  localStorage.setItem('ai_provider', p);
+  const off = 'background:none;color:#64748b;border:none;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;';
+  const el = id => document.getElementById(id);
+  if (el('mproviderClaude'))      el('mproviderClaude').style.cssText      = p === 'claude'       ? 'background:#7c3aed;color:white;border:none;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;' : off;
+  if (el('mproviderOllama'))      el('mproviderOllama').style.cssText      = p === 'ollama'       ? 'background:#059669;color:white;border:none;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;' : off;
+  if (el('mproviderLocalClaude')) el('mproviderLocalClaude').style.cssText = p === 'local-claude' ? 'background:#0891b2;color:white;border:none;padding:4px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;' : off;
+  if (el('modal-api-key'))        el('modal-api-key').style.display        = p === 'claude' ? '' : 'none';
+  if (el('modal-ollama-model'))   el('modal-ollama-model').style.display   = p === 'ollama' ? 'block' : 'none';
+  if (p === 'ollama') _loadModalOllamaModels();
+}
+
+async function _loadModalOllamaModels() {
+  const sel = document.getElementById('modal-ollama-model');
+  sel.innerHTML = '<option value="">Starting Ollama…</option>';
+  try {
+    const data = await (await fetch('/ollama/tags')).json();
+    const models = (data.models || []).map(m => m.name);
+    if (!models.length) { sel.innerHTML = '<option value="">No models installed</option>'; return; }
+    const saved = localStorage.getItem('ollama_model') || '';
+    sel.innerHTML = models.map(m => `<option value="${m}"${m===saved?' selected':''}>${m}</option>`).join('');
+  } catch { sel.innerHTML = '<option value="">Ollama unavailable</option>'; }
+}
+
+const MODAL_CFG = {
+  domain: {
+    title: 'Add Domain',
+    sub: 'Describe the domain. AI will design the modules and lessons structure.',
+    placeholder: 'e.g. Add a GraphQL mastery domain covering schema design, resolvers, subscriptions and federation',
+  },
+  module: {
+    title: 'Add Module',
+    sub: 'Describe the module. AI will design the lessons structure.',
+    placeholder: 'e.g. Add a module on advanced concurrency patterns and async context managers',
+  },
+  lesson: {
+    title: 'Add Lesson',
+    sub: 'Describe the lesson topic. AI will name it and generate its full content.',
+    placeholder: 'e.g. Deep dive into the descriptor protocol: __get__, __set__, __delete__',
+  },
+  'gen-lesson': {
+    title: 'Generate First Lesson',
+    sub: 'AI will generate the first lesson content in the background.',
+    placeholder: '',
+    noPrompt: true,
+  },
+};
+
+// ── Progress ──────────────────────────────────────────────────────────────────
+function isComplete(key) {
+  if (!key) return false;
+  const data = JSON.parse(localStorage.getItem(key) || '{}');
+  if (data.complete) return true;
+  const short = key.match(/^(m\d+-l\d+)/);
+  if (short) {
+    if (JSON.parse(localStorage.getItem(short[1]) || '{}').complete) return true;
+  }
+  const legacy = JSON.parse(localStorage.getItem('lessonProgress') || '{}');
+  if (legacy[key]?.completed) return true;
+  if (short && legacy[short[1]]?.completed) return true;
+  if (serverProgress[key]) return true;
+  if (short && serverProgress[short[1]]) return true;
+  return false;
+}
+
+function domainKeys(domain) {
+  const out = [];
+  (domain.modules || []).forEach(m => (m.lessons || []).forEach(l => out.push(l.key)));
+  return out;
+}
+
+function isAvailable(key, keys) {
+  const idx = keys.indexOf(key);
+  if (idx <= 0) return true;
+  return isComplete(keys[idx - 1]);
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  const domains = (program?.domains || []).filter(d => currentFilter === 'all' || d.id === currentFilter);
+
+  if (!program?.domains?.length) {
+    main.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🚀</div>
+      <h2>No domains yet</h2>
+      <p>Click <strong>+ Add Domain</strong> above to let Claude design<br>the first domain with modules and lessons.</p>
+    </div>`;
+    return;
+  }
+
+  let totalLessons = 0, doneLessons = 0;
+
+  domains.forEach(domain => {
+    const dKeys = domainKeys(domain);
+    let domainDone = 0, domainTotal = 0;
+    (domain.modules || []).forEach(m => (m.lessons || []).forEach(l => {
+      domainTotal++; totalLessons++;
+      if (isComplete(l.key)) { domainDone++; doneLessons++; }
+    }));
+
+    const pct = domainTotal > 0 ? Math.round(domainDone / domainTotal * 100) : 0;
+    const sec = document.createElement('div');
+    sec.className = 'domain-section';
+    sec.innerHTML = `
+      <div class="domain-header">
+        <div class="domain-dot" style="background:${domain.color}"></div>
+        <div class="domain-title" style="color:${domain.color}">${domain.name}</div>
+        <div class="domain-count">${domainDone}/${domainTotal} · ${pct}%</div>
+        ${!domain.first_lesson_has_content && domain.modules?.length && domain.modules[0].lessons?.length
+          ? `<button class="gen-first-btn" style="--btn-color:${domain.color}"
+              onclick="generateFirstLesson('${domain.id}')">⚡ Generate First Lesson</button>` : ''}
+        <button class="add-mod-btn" style="--btn-color:${domain.color}"
+          onclick="openModal('module','${domain.id}')">＋ Add Module</button>
+      </div>
+      <div class="domain-progress-bar">
+        <div class="domain-progress-fill" style="width:${pct}%;background:${domain.color}"></div>
+      </div>`;
+
+    (domain.modules || []).forEach(mod => {
+      const modRow = document.createElement('div');
+      modRow.className = 'module-row';
+      modRow.innerHTML = `<div class="module-label">
+        <span>M${mod.num} — ${mod.name}</span>
+        <button class="add-lesson-btn" style="--btn-color:${domain.color}"
+          onclick="openModal('lesson','${domain.id}',${mod.num})">＋ Add Lesson</button>
+      </div>`;
+
+      const grid = document.createElement('div');
+      grid.className = 'lessons-grid';
+      (mod.lessons || []).forEach(lesson => {
+        const done = isComplete(lesson.key);
+        const avail = lesson.has_content && (done || isAvailable(lesson.key, dKeys));
+        const card = document.createElement('a');
+        card.className = `lesson-card${done ? ' complete' : avail ? ' available' : ' locked'}`;
+        card.href = (done || avail) ? `modules/lesson.html?c=${lesson.key}&p=${PROGRAM_ID}&d=${domain.id}` : '#';
+        card.innerHTML = `
+          <div class="card-num" style="color:${domain.color}">M${mod.num} · L${lesson.l}</div>
+          <div class="card-topic">${lesson.title}</div>
+          <div class="card-status">
+            <span class="badge ${done ? 'done' : avail ? 'available' : 'locked'}"
+              ${avail && !done ? `style="color:${domain.color}"` : ''}>
+              ${done ? '✓ Complete' : avail ? 'Available' : 'Locked'}
+            </span>
+          </div>`;
+        grid.appendChild(card);
+      });
+
+      modRow.appendChild(grid);
+      sec.appendChild(modRow);
+    });
+
+    main.appendChild(sec);
+  });
+
+  const pct = totalLessons > 0 ? Math.round(doneLessons / totalLessons * 100) : 0;
+  document.getElementById('stat-total').textContent = `${doneLessons}/${totalLessons}`;
+  document.getElementById('stat-pct').textContent = `${pct}%`;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function filterDomain(id) {
+  currentFilter = id;
+  document.querySelectorAll('#tabs .tab').forEach(t => {
+    t.classList.toggle('active', (id === 'all' && t.textContent === 'All') || t.dataset.domainId === id);
+  });
+  render();
+}
+
+function rebuildTabs() {
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = `<div class="tab active" onclick="filterDomain('all')">All</div>`;
+  (program.domains || []).forEach(domain => {
+    const t = document.createElement('div');
+    t.className = 'tab';
+    t.dataset.domainId = domain.id;
+    t.textContent = domain.name;
+    t.onclick = () => filterDomain(domain.id);
+    tabsEl.appendChild(t);
+  });
+  const addTab = document.createElement('div');
+  addTab.className = 'tab-add';
+  addTab.textContent = '+ Add Domain';
+  addTab.onclick = () => openModal('domain');
+  tabsEl.appendChild(addTab);
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(mode, domainId, modNum) {
+  modalMode = mode;
+  modalDomainId = domainId || null;
+  modalModNum = modNum || null;
+  const cfg = MODAL_CFG[mode] || MODAL_CFG.domain;
+  let title = cfg.title;
+  if (mode === 'module' && domainId) {
+    const d = (program?.domains || []).find(x => x.id === domainId);
+    if (d) title += ` — ${d.name}`;
+  }
+  if (mode === 'lesson' && domainId) {
+    const d = (program?.domains || []).find(x => x.id === domainId);
+    const m = (d?.modules || []).find(x => x.num === modNum);
+    if (m) title += ` — ${m.name}`;
+  }
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').textContent = cfg.sub;
+  document.getElementById('modal-prompt').placeholder = cfg.placeholder;
+  document.getElementById('modal-prompt').value = '';
+  document.getElementById('modal-prompt').style.display = cfg.noPrompt ? 'none' : '';
+  document.getElementById('modal-api-key').value = localStorage.getItem('claude_api_key') || '';
+  setFeedback('');
+  document.getElementById('modal-go').disabled = false;
+  // Apply current provider state
+  setModalProvider(_modalProvider);
+  document.getElementById('add-modal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('modal-prompt').focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('add-modal').classList.add('hidden');
+}
+
+document.getElementById('add-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('add-modal')) closeModal();
+});
+
+function setFeedback(msg, type) {
+  const el = document.getElementById('modal-feedback');
+  el.innerHTML = msg;
+  el.className = 'modal-feedback' + (type ? ` ${type}` : '');
+}
+
+async function generateFirstLesson(domainId) {
+  const apiKey = localStorage.getItem('claude_api_key');
+  const needsKey = _modalProvider === 'claude' && !apiKey;
+  if (needsKey) {
+    modalDomainId = domainId;
+    openModal('gen-lesson', domainId);
+    return;
+  }
+  await _startGenFirstLesson(apiKey, domainId);
+}
+
+function _aiPayload(apiKey) {
+  const ollamaModel = document.getElementById('modal-ollama-model')?.value || localStorage.getItem('ollama_model') || '';
+  const claudeModel = localStorage.getItem('claude_model') || 'claude-sonnet-4-6';
+  if (_modalProvider === 'ollama') {
+    if (ollamaModel) localStorage.setItem('ollama_model', ollamaModel);
+    return { provider: 'ollama', ollama_model: ollamaModel };
+  }
+  if (_modalProvider === 'local-claude') {
+    return { provider: 'local-claude', claude_model: claudeModel };
+  }
+  return { api_key: apiKey, provider: 'claude', claude_model: claudeModel };
+}
+
+async function _startGenFirstLesson(apiKey, domainId) {
+  closeModal();
+  const ollamaModel = document.getElementById('modal-ollama-model')?.value || localStorage.getItem('ollama_model') || '';
+  if (_modalProvider === 'ollama' && ollamaModel) localStorage.setItem('ollama_model', ollamaModel);
+  try {
+    const res = await fetch('/generate_first_domain_lesson', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ ..._aiPayload(apiKey), program_id: PROGRAM_ID, domain_id: domainId }),
+    });
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const { job_id } = await res.json();
+    const d = (program?.domains || []).find(x => x.id === domainId);
+    _genJobId = job_id;
+    _genMode = 'gen-lesson';
+    if (_genPollTimer) clearTimeout(_genPollTimer);
+    const aiName = _modalProvider === 'ollama' ? `Ollama (${ollamaModel || 'model'})` : 'AI';
+    _setGenNotif('<span class="gen-spinner"></span>', 'Generating first lesson…',
+      `${d?.name || domainId} — ${aiName} (~1 min)`);
+    _genPollTimer = setTimeout(_pollGenStatus, 3500);
+  } catch (e) {
+    _setGenNotif('✗', 'Failed to start', e.message, 'error');
+  }
+}
+
+async function submitModal() {
+  const apiKey = document.getElementById('modal-api-key').value.trim() || localStorage.getItem('claude_api_key');
+  if (_modalProvider === 'claude' && !apiKey) { setFeedback('API key required.', 'error'); return; }
+  if (apiKey) localStorage.setItem('claude_api_key', apiKey);
+
+  if (modalMode === 'gen-lesson') {
+    await _startGenFirstLesson(apiKey, modalDomainId);
+    return;
+  }
+
+  const prompt = document.getElementById('modal-prompt').value.trim();
+  if (!prompt) { setFeedback('Please enter a description.', 'error'); return; }
+
+  const go = document.getElementById('modal-go');
+  go.disabled = true;
+  setFeedback('<span class="modal-spinner"></span>Queuing…');
+
+  let url, body;
+  if (modalMode === 'domain') {
+    url = '/add_domain';
+    body = { ..._aiPayload(apiKey), program_id: PROGRAM_ID, prompt };
+  } else if (modalMode === 'module') {
+    url = '/add_module';
+    body = { ..._aiPayload(apiKey), program_id: PROGRAM_ID, domain_id: modalDomainId, prompt };
+  } else {
+    url = '/add_lesson';
+    body = { ..._aiPayload(apiKey), program_id: PROGRAM_ID, domain_id: modalDomainId, mod_num: modalModNum, prompt };
+  }
+
+  try {
+    const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const { job_id } = await res.json();
+
+    closeModal();
+    _genJobId = job_id;
+    _genMode = modalMode;
+    if (_genPollTimer) clearTimeout(_genPollTimer);
+    const _aiLabel = _modalProvider === 'ollama' ? `Ollama (${document.getElementById('modal-ollama-model')?.value || 'model'})` : _modalProvider === 'local-claude' ? 'Local Claude' : 'Claude API';
+    _setGenNotif('<span class="gen-spinner"></span>', `Generating ${_genLabel(modalMode)}…`,
+      `Calling ${_aiLabel} — this takes 1–2 min. You can keep browsing.`);
+    _genPollTimer = setTimeout(_pollGenStatus, 3500);
+  } catch (e) {
+    setFeedback('Error: ' + e.message, 'error');
+    go.disabled = false;
+  }
+}
+
+// ── Background notification ───────────────────────────────────────────────────
+let _genJobId = null;
+let _genPollTimer = null;
+let _genMode = null;
+
+function closeGenNotif() {
+  document.getElementById('genNotif').classList.remove('show', 'success', 'error');
+  if (_genPollTimer) { clearTimeout(_genPollTimer); _genPollTimer = null; }
+}
+
+function _genLabel(mode) {
+  if (mode === 'domain') return 'domain curriculum';
+  if (mode === 'module') return 'module curriculum';
+  if (mode === 'gen-lesson') return 'first lesson';
+  return 'lesson';
+}
+
+function _setGenNotif(icon, title, msg, state) {
+  const el = document.getElementById('genNotif');
+  document.getElementById('genNotifIcon').innerHTML = icon;
+  document.getElementById('genNotifTitle').textContent = title;
+  document.getElementById('genNotifMsg').textContent = msg;
+  el.classList.remove('success', 'error');
+  if (state) el.classList.add(state);
+  el.classList.add('show');
+}
+
+async function _pollGenStatus() {
+  if (!_genJobId) return;
+  try {
+    const s = await (await fetch(`/generation_status?job=${_genJobId}`)).json();
+    if (s.status === 'running') {
+      const phase = s.phase === 'generating_lesson' ? 'Generating first lesson… (~2 min)' : 'Designing curriculum…';
+      _setGenNotif('<span class="gen-spinner"></span>', `Generating ${_genLabel(_genMode)}…`, phase);
+      _genPollTimer = setTimeout(_pollGenStatus, 3500);
+    } else if (s.status === 'done') {
+      const label = _genLabel(_genMode);
+      _setGenNotif('✓', 'Done!', `${label.charAt(0).toUpperCase() + label.slice(1)} generated successfully.`, 'success');
+      await loadProgram();
+    } else {
+      _setGenNotif('✗', 'Generation failed', s.error || 'Unknown error', 'error');
+    }
+  } catch (_) {
+    _genPollTimer = setTimeout(_pollGenStatus, 3500);
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function loadProgram() {
+  const res = await fetch(`/program/${PROGRAM_ID}`);
+  if (!res.ok) { document.getElementById('prog-name').textContent = 'Program not found'; return; }
+  program = await res.json();
+
+  document.title = program.name;
+  document.getElementById('prog-icon').textContent = program.icon || '📚';
+  document.getElementById('prog-name').textContent = program.name;
+  document.getElementById('prog-desc').textContent = program.description || '';
+  document.documentElement.style.setProperty('--prog-color', program.color || '#a855f7');
+
+  rebuildTabs();
+  render();
+}
+
+async function init() {
+  try { serverProgress = await (await fetch('/completed_lessons')).json(); } catch (e) {}
+  await loadProgram();
+}
+
+init();
+// Apply saved provider to modal toggle on page load
+setModalProvider(_modalProvider);
+
+// Sync live modal state when global AI settings change
+document.addEventListener('aisettings:changed', e => {
+  setModalProvider(e.detail.provider);
+});
+</script>
+<script src="/ai-settings.js"></script>
+</body>
+</html>

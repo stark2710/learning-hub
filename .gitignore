@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# macOS / editor cruft
+.DS_Store
+
+# Local-only / machine-specific
+*.log
+.claude/settings.local.json
+
+# Personal data — your own chat questions log; not needed by the app or demo
+questions_log.json

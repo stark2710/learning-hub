@@ -55,3 +55,13 @@ status: active
 total_lessons: 0
 ---
 Your Boomi Intergration Mastery learning program
+
+---
+name: MPPSC 2027
+icon: 🎯
+color: #7c3aed
+url: /program.html?id=mppsc-2027
+status: active
+total_lessons: 0
+---
+Your MPPSC 2027 learning program
